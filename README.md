@@ -1,1 +1,1 @@
-betacodersoptiwealt.vercel.app
+https://betacodersoptiwealt.vercel.app/
