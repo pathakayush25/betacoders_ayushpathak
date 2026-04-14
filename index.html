@@ -749,11 +749,7 @@
         // Trigger computing logic
         function compute(type) {
             const tags = document.querySelectorAll('.stock-tag');
-            if(tags.length < 2) 
-            window.currentMode = type;
-            if(window.currentMode === 'quantum'){
-    quantReturn += 1; // extra boost
-}{
+            if(tags.length < 2) {
                 alert("Please add at least 2 assets to run the optimization algorithms.");
                 return;
             }
@@ -776,11 +772,8 @@
             }, 100);
 
             setTimeout(() => {
-let classicalRisk = Math.min(80, 50 + stocks.length * 3);
-let quantumRisk = Math.max(20, classicalRisk - 20);
-
-document.getElementById('classical-risk-bar').style.width = classicalRisk + '%';
-document.getElementById('quantum-risk-bar').style.width = quantumRisk + '%';
+                document.getElementById('classical-risk-bar').style.width = '65%';
+                document.getElementById('quantum-risk-bar').style.width = '38%';
                 animateCounter('improvementCounter', 0, 47, 2000);
             }, 600);
 
@@ -805,22 +798,14 @@ document.getElementById('quantum-risk-bar').style.width = quantumRisk + '%';
         function initCharts() {
             const stocks = Array.from(document.querySelectorAll('.stock-tag')).map(el => el.childNodes[0].nodeValue.trim());
             
-// Simulated returns based on diversification
-const baseReturn = 10 + (stocks.length * 0.5);
-const quantReturn = baseReturn + 3; // quantum better but controlled
+            const baseReturn = 8 + (stocks.length * 0.8);
+            const quantReturn = baseReturn + 5 + (Math.random() * 3);
             
             document.getElementById('classical-return').innerText = baseReturn.toFixed(1) + '%';
             document.getElementById('quantum-return').innerText = quantReturn.toFixed(1) + '%';
 
-// Generate normalized weights (sum = 100%)
-let classicalData = stocks.map(() => Math.random());
-let sumC = classicalData.reduce((a,b) => a+b,0);
-classicalData = classicalData.map(v => Math.round((v/sumC)*100));
-
-// Quantum = slightly optimized (less variance)
-let quantumData = stocks.map(() => Math.random() + 0.5);
-let sumQ = quantumData.reduce((a,b) => a+b,0);
-quantumData = quantumData.map(v => Math.round((v/sumQ)*100));
+            let classicalData = stocks.map(() => Math.floor(Math.random() * 30 + 10));
+            let quantumData = stocks.map(() => Math.floor(Math.random() * 40 + 5));
 
             const cPalette = ['#00e5ff', '#0097ff', '#0055ff', '#5500ff', '#30475e', '#f05454'];
             const qPalette = ['#bd00ff', '#ff0099', '#00e5ff', '#ffcc00', '#00ffaa', '#ff3366'];
@@ -885,9 +870,6 @@ quantumData = quantumData.map(v => Math.round((v/sumQ)*100));
                     },
                     interaction: { mode: 'index', intersect: false },
                     plugins: { legend: { position: 'top', labels: { color: '#fff', font: { size: 14 } } }, tooltip: { backgroundColor: 'rgba(17, 25, 40, 0.9)' } }
-                    document.querySelector('#classical-risk-bar').parentElement.previousElementSibling.querySelector('span:last-child').innerText = classicalRisk + "/100";
-
-document.querySelector('#quantum-risk-bar').parentElement.previousElementSibling.querySelector('span:last-child').innerText = quantumRisk + "/100";
                 }
             });
         }
