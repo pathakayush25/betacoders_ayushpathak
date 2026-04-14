@@ -269,6 +269,162 @@
         /* Fade-in Animation */
         .fade-in { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes fadeInScale { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+        
+        /* Portfolio Configuration Panel styles */
+        .config-panel {
+            background: #060913; 
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            max-width: 1050px;
+            margin: 0 auto 2rem;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.4);
+            font-family: 'Inter', sans-serif;
+        }
+
+        .config-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 2rem 2.5rem;
+        }
+
+        .config-title-wrapper {
+            border-left: 4px solid var(--primary);
+            padding-left: 1rem;
+        }
+
+        .config-title {
+            font-size: 1.4rem;
+            color: #fff;
+            margin-bottom: 0.3rem;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+        }
+
+        .config-subtitle {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .btn-reset {
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-muted);
+            border-radius: 20px;
+            padding: 0.4rem 1rem;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            transition: var(--transition);
+        }
+        .btn-reset:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+        }
+
+        .section-label {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+        .section-label-title {
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+        }
+        .section-label-meta {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .assets-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            margin-bottom: 2rem;
+            padding: 0 2.5rem;
+        }
+
+        .asset-card {
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 0.8rem 1.2rem;
+            min-width: 110px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.01);
+            cursor: pointer;
+            position: relative;
+            transition: var(--transition);
+        }
+        .asset-card:hover { border-color: rgba(255, 255, 255, 0.3); }
+        .asset-name { font-size: 0.85rem; font-weight: 600; color: #aaa; margin-bottom: 0.3rem; }
+        .asset-cat { font-size: 0.65rem; color: #666; }
+
+        .asset-card.selected-orange { border-color: #d97736; background: rgba(217, 119, 54, 0.05); }
+        .asset-card.selected-orange .asset-name { color: #d97736; }
+        .asset-card.selected-orange .asset-cat { color: rgba(217, 119, 54, 0.7); }
+
+        .asset-card.selected-blue { border-color: #0d6cf2; background: rgba(13, 108, 242, 0.05); }
+        .asset-card.selected-blue .asset-name { color: #0d6cf2; }
+        .asset-card.selected-blue .asset-cat { color: rgba(13, 108, 242, 0.7); }
+
+        .asset-card.selected-cyan { border-color: #00e5ff; background: rgba(0, 229, 255, 0.05); box-shadow: 0 0 15px rgba(0,229,255,0.15); }
+        .asset-card.selected-cyan .asset-name { color: #00e5ff; text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+        .asset-card.selected-cyan .asset-cat { color: rgba(0, 229, 255, 0.7); }
+
+        .asset-check {
+            position: absolute; top: -6px; right: -6px; width: 14px; height: 14px;
+            background: var(--primary); border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .asset-check::after { content: '✓'; color: #000; font-size: 9px; font-weight: bold; }
+
+        .selected-portfolio { padding: 0 2.5rem; margin-bottom: 2.5rem; }
+
+        .portfolio-pill {
+            display: flex; align-items: center; gap: 0.6rem;
+            padding: 0.5rem 1rem; border: 1px solid #1c2b4c; background: #0b1324;
+            border-radius: 20px; transition: var(--transition);
+        }
+        .portfolio-pill .p-name { color: #4da6ff; font-size: 0.85rem; font-weight: 600; }
+        .portfolio-pill .p-price { color: #6c757d; font-size: 0.85rem; }
+        .portfolio-pill .p-close { color: #4d4d4d; cursor: pointer; font-size: 1rem; line-height: 1; }
+        .portfolio-pill .p-close:hover { color: #ff4d4d; }
+
+        .budget-section { padding: 0 2.5rem; margin-bottom: 2rem; }
+        .budget-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+        .budget-value { color: var(--primary); font-size: 1.3rem; font-weight: 700; font-family: 'Inter', sans-serif; }
+
+        .custom-range-container { position: relative; width: 100%; height: 6px; background: #1a1a24; border-radius: 3px; margin-bottom: 1rem; }
+        .custom-range-fill { position: absolute; top: 0; left: 0; height: 100%; background: linear-gradient(90deg, #0055ff, #00e5ff); border-radius: 3px; width: 19.5%; }
+        .custom-range-thumb {
+            position: absolute; top: 50%; left: 19.5%; transform: translate(-50%, -50%);
+            width: 18px; height: 18px; background: var(--primary); border-radius: 50%; cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 229, 255, 0.4); pointer-events: none;
+        }
+        .custom-range-input { position: absolute; top: -10px; left: 0; width: 100%; height: 26px; opacity: 0; cursor: pointer; z-index: 10; }
+
+        .budget-markers { display: flex; justify-content: space-between; color: #4a5468; font-size: 0.75rem; }
+
+        .config-footer {
+            border-top: 1px solid rgba(255,255,255,0.05); padding: 1.5rem 2.5rem;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .config-actions { display: flex; gap: 1rem; }
+        .btn-dark { background: #0a0a0f; border: 1px solid #1a1a24; color: #fff; padding: 0.7rem 1.2rem; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 500; }
+        .btn-cyan { background: linear-gradient(90deg, #00d2ff 0%, #3a7bd5 100%); border: none; color: #000; padding: 0.7rem 1.2rem; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 600; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2); }
+        .btn-blue { background: #4a80ff; border: none; color: #000; padding: 0.7rem 1.2rem; border-radius: 8px; font-size: 0.9rem; cursor: pointer; font-weight: 600; }
+        
+        .footer-meta { color: var(--text-muted); font-size: 0.85rem; }
+        .footer-meta .highlight { color: var(--primary); font-weight: 600; }
     </style>
 </head>
 <body>
@@ -387,42 +543,127 @@
             </div>
 
             <!-- Configuration / Input Section -->
-            <div id="input-section" class="glass-card" style="margin-bottom: 2rem; max-width: 850px; margin-left: auto; margin-right: auto;">
-                <h3 style="margin-bottom: 2.5rem; font-size: 1.5rem;">Configure Your Portfolio</h3>
-                
-                <div style="margin-bottom: 2.5rem;">
-                    <label style="display:block; margin-bottom: 1rem; color: #b4c5e4;">Investment Budget (INR)</label>
-                    <div class="flex-between" style="margin-bottom: 1rem;">
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">₹10,000</span>
-                        <span class="budget-display">₹<span id="budgetFormatted">10,00,000</span></span>
-                        <span style="color: var(--text-muted); font-size: 0.9rem;">₹1,00,00,000</span>
+            <div id="input-section" class="config-panel">
+                <div class="config-header">
+                    <div class="config-title-wrapper">
+                        <h2 class="config-title">Portfolio Configuration</h2>
+                        <p class="config-subtitle">Select NSE-listed stocks &bull; Set investment budget</p>
                     </div>
-                    <input type="range" id="budgetRange" min="10000" max="10000000" step="10000" value="1000000">
+                    <button class="btn-reset" onclick="resetConfig()">
+                        <span>↺</span> Reset
+                    </button>
                 </div>
 
-                <div>
-                    <label style="display:block; margin-bottom: 1rem; color: #b4c5e4;">Add Assets to Portfolio</label>
-                    <div style="display: flex; gap: 1rem;">
-                        <input type="text" id="stockInput" class="stock-in" placeholder="Enter stock ticker (e.g. RELIANCE, TCS)">
-                        <button class="btn btn-outline" onclick="addStock()" style="padding: 0 2rem;">Add</button>
-                    </div>
-                    <div class="stock-tags" id="stockList">
-                        <div class="stock-tag">RELIANCE <span>✕</span></div>
-                        <div class="stock-tag">TCS <span>✕</span></div>
-                        <div class="stock-tag">HDFCBANK <span>✕</span></div>
-                        <div class="stock-tag">INFY <span>✕</span></div>
-                        <div class="stock-tag">ITC <span>✕</span></div>
+                <!-- Asset Search Bar -->
+                <div style="padding: 0 2.5rem; margin-bottom: 1.5rem;">
+                    <div style="position: relative;">
+                        <input type="text" id="assetSearchInput" placeholder="Search stocks or add new (e.g. TATASTEEL)..." 
+                               style="width: 100%; padding: 0.8rem 1rem 0.8rem 2.5rem; background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; color: #fff; font-family:'Inter', sans-serif; font-size: 0.9rem; outline: none; transition: all 0.3s;"
+                               oninput="filterAssets(this.value)" onkeypress="handleSearchKey(event, this.value)">
+                        <span style="position: absolute; left: 0.8rem; top: 50%; transform: translateY(-50%); font-size: 1.1rem; opacity: 0.5;">🔍</span>
+                        <button onclick="addSearchedAsset()" style="position: absolute; right: 0.5rem; top: 50%; transform: translateY(-50%); background: var(--primary); color: #000; border: none; padding: 0.4rem 0.8rem; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 0.8rem;">Add</button>
                     </div>
                 </div>
 
-                <div style="display: flex; gap: 1.5rem; margin-top: 3.5rem; flex-wrap: wrap;">
-                    <button class="btn btn-outline" style="flex: 1; min-width: 200px; padding: 1.2rem;" onclick="compute('classical')">
-                        Classical Compute
-                    </button>
-                    <button class="btn btn-quantum" style="flex: 1; min-width: 200px; padding: 1.2rem;" onclick="compute('quantum')">
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
-                        Quantum Compute
-                    </button>
+                <div class="assets-grid" id="availableAssetsGrid">
+                    <div class="section-label">
+                        <span class="section-label-title">AVAILABLE ASSETS</span>
+                        <span class="section-label-meta" id="assetSelectedCountMeta">2 selected &bull; min 2</span>
+                    </div>
+                    
+                    <div class="asset-card selected-orange" data-name="RELIANCE" data-cat="Energy" data-price="₹2,847.5" onclick="toggleAssetCard(this)">
+                        <div class="asset-check"></div>
+                        <div class="asset-name">RELIANCE</div>
+                        <div class="asset-cat">Energy</div>
+                    </div>
+                    <div class="asset-card selected-blue" data-name="TCS" data-cat="Technology" data-price="₹3,912" onclick="toggleAssetCard(this)">
+                        <div class="asset-check"></div>
+                        <div class="asset-name">TCS</div>
+                        <div class="asset-cat">Technology</div>
+                    </div>
+                    <div class="asset-card" data-name="INFY" data-cat="Technology" data-price="₹1,432" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">INFY</div>
+                        <div class="asset-cat">Technology</div>
+                    </div>
+                    <div class="asset-card" data-name="HDFCBANK" data-cat="Finance" data-price="₹1,650" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">HDFCBANK</div>
+                        <div class="asset-cat">Finance</div>
+                    </div>
+                    <div class="asset-card" data-name="WIPRO" data-cat="Technology" data-price="₹425" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">WIPRO</div>
+                        <div class="asset-cat">Technology</div>
+                    </div>
+                    <div class="asset-card" data-name="ICICIBANK" data-cat="Finance" data-price="₹1,020" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">ICICIBANK</div>
+                        <div class="asset-cat">Finance</div>
+                    </div>
+                    <div class="asset-card" data-name="SUNPHARMA" data-cat="Pharma" data-price="₹1,130" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">SUNPHARMA</div>
+                        <div class="asset-cat">Pharma</div>
+                    </div>
+                    <div class="asset-card" data-name="BHARTIARTL" data-cat="Telecom" data-price="₹980" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">BHARTIARTL</div>
+                        <div class="asset-cat">Telecom</div>
+                    </div>
+                    <div class="asset-card" data-name="LTIM" data-cat="Technology" data-price="₹5,200" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">LTIM</div>
+                        <div class="asset-cat">Technology</div>
+                    </div>
+                    <div class="asset-card" data-name="ADANIPORTS" data-cat="Infrastructure" data-price="₹810" onclick="toggleAssetCard(this)">
+                        <div class="asset-name">ADANIPORTS</div>
+                        <div class="asset-cat">Infrastructure</div>
+                    </div>
+                </div>
+
+                <div class="selected-portfolio">
+                    <div class="section-label" style="margin-bottom: 0.8rem;">
+                        <span class="section-label-title">SELECTED PORTFOLIO</span>
+                        <span></span>
+                    </div>
+                    <div id="selectedPillsContainer" style="display:flex; gap:0.8rem; width:100%; flex-wrap: wrap;">
+                        <div class="portfolio-pill" data-name="RELIANCE">
+                            <span class="p-name">RELIANCE</span>
+                            <span class="p-price">₹2,847.5</span>
+                            <span class="p-close" onclick="removePortfolioPill('RELIANCE')">✕</span>
+                        </div>
+                        <div class="portfolio-pill" data-name="TCS">
+                            <span class="p-name">TCS</span>
+                            <span class="p-price">₹3,912</span>
+                            <span class="p-close" onclick="removePortfolioPill('TCS')">✕</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="budget-section">
+                    <div class="budget-header">
+                        <span class="section-label-title" style="margin:0;">INVESTMENT BUDGET</span>
+                        <span class="budget-value" id="budgetFormatted">₹20.0L</span>
+                    </div>
+                    
+                    <div class="custom-range-container">
+                        <div class="custom-range-fill" id="budgetFill" style="width: 19.6%;"></div>
+                        <div class="custom-range-thumb" id="budgetThumb" style="left: 19.6%;"></div>
+                        <input type="range" class="custom-range-input" id="budgetRange" min="50000" max="10000000" step="50000" value="2000000">
+                    </div>
+                    
+                    <div class="budget-markers">
+                        <span>₹50K</span>
+                        <span>₹25L</span>
+                        <span>₹50L</span>
+                        <span>₹75L</span>
+                        <span>₹1 Cr</span>
+                    </div>
+                </div>
+
+                <div class="config-footer">
+                    <div class="config-actions">
+                        <button class="btn-dark" onclick="compute('classical')">Classical Compute</button>
+                        <button class="btn-cyan" onclick="compute('quantum')">⚡ Quantum Compute</button>
+                        <button class="btn-blue" onclick="compute('comparison')">Run Comparison</button>
+                    </div>
+                    <div class="footer-meta">
+                        <span class="highlight" id="footerBudget">₹20.0L</span> &bull; <span id="assetCountBottom">2 assets</span>
+                    </div>
                 </div>
             </div>
 
@@ -706,9 +947,155 @@
         }
 
         // --- 3. Dashboard Functionality / Calculator Logics ---
-        document.querySelectorAll('.stock-tag span').forEach(el => {
-            el.addEventListener('click', function() { this.parentElement.remove(); });
-        });
+        
+        function filterAssets(query) {
+            query = query.trim().toUpperCase();
+            const cards = document.querySelectorAll('.asset-card');
+            cards.forEach(card => {
+                const name = card.dataset.name.toUpperCase();
+                if (name.includes(query)) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function handleSearchKey(event, value) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                addSearchedAsset();
+            }
+        }
+
+        function addSearchedAsset() {
+            const input = document.getElementById('assetSearchInput');
+            const val = input.value.trim().toUpperCase();
+            if (!val) return;
+            
+            // If already exists, just toggle it to selected
+            const existing = document.querySelector(`.asset-card[data-name="${val}"]`);
+            if (existing) {
+                if (!existing.classList.contains('selected-orange') && !existing.classList.contains('selected-blue') && !existing.classList.contains('selected-cyan')) {
+                    toggleAssetCard(existing);
+                }
+                existing.style.display = 'flex';
+                input.value = '';
+                filterAssets('');
+                return;
+            }
+            
+            // Otherwise, create a new asset card
+            const grid = document.getElementById('availableAssetsGrid');
+            const price = '₹' + Math.floor(Math.random() * 5000 + 100).toLocaleString('en-IN');
+            
+            const newCard = document.createElement('div');
+            newCard.className = 'asset-card selected-cyan';
+            newCard.dataset.name = val;
+            newCard.dataset.cat = 'Custom';
+            newCard.dataset.price = price;
+            newCard.onclick = function() { toggleAssetCard(this); };
+            
+            newCard.innerHTML = `
+                <div class="asset-check"></div>
+                <div class="asset-name">${val}</div>
+                <div class="asset-cat">Custom</div>
+            `;
+            grid.appendChild(newCard);
+            
+            // Add to selected portfolio
+            addPortfolioPill(val, price);
+            updateAssetCount();
+            
+            input.value = '';
+            filterAssets('');
+        }
+
+        function toggleAssetCard(card) {
+            const name = card.dataset.name;
+            const price = card.dataset.price;
+            
+            const isSelected = card.classList.contains('selected-orange') || card.classList.contains('selected-blue') || card.classList.contains('selected-cyan');
+            
+            if (isSelected) {
+                // Deselect
+                card.classList.remove('selected-orange', 'selected-blue', 'selected-cyan');
+                const check = card.querySelector('.asset-check');
+                if (check) check.remove();
+                removePortfolioPill(name, false); // removing pill without recursive clear
+            } else {
+                // Select -> apply generic cyan glow
+                card.classList.add('selected-cyan');
+                if (!card.querySelector('.asset-check')) {
+                    const check = document.createElement('div');
+                    check.className = 'asset-check';
+                    card.insertBefore(check, card.firstChild);
+                }
+                addPortfolioPill(name, price);
+            }
+            updateAssetCount();
+        }
+
+        function addPortfolioPill(name, price) {
+            const container = document.getElementById('selectedPillsContainer');
+            if (document.querySelector(`.portfolio-pill[data-name="${name}"]`)) return; // already there
+            
+            const pill = document.createElement('div');
+            pill.className = 'portfolio-pill';
+            pill.dataset.name = name;
+            pill.innerHTML = `
+                <span class="p-name">${name}</span>
+                <span class="p-price">${price}</span>
+                <span class="p-close" onclick="removePortfolioPill('${name}')">✕</span>
+            `;
+            container.appendChild(pill);
+        }
+
+        function removePortfolioPill(name, syncCard = true) {
+            const pill = document.querySelector(`.portfolio-pill[data-name="${name}"]`);
+            if (pill) pill.remove();
+            
+            if (syncCard) {
+                const card = document.querySelector(`.asset-card[data-name="${name}"]`);
+                if (card) {
+                    card.classList.remove('selected-orange', 'selected-blue', 'selected-cyan');
+                    const check = card.querySelector('.asset-check');
+                    if (check) check.remove();
+                }
+            }
+            updateAssetCount();
+        }
+        
+        function resetConfig() {
+            // Deselect all
+            document.querySelectorAll('.asset-card').forEach(c => {
+                c.classList.remove('selected-orange', 'selected-blue', 'selected-cyan');
+                const chk = c.querySelector('.asset-check');
+                if(chk) chk.remove();
+            });
+            document.getElementById('selectedPillsContainer').innerHTML = '';
+            
+            // Re-select defaults
+            const rel = document.querySelector('.asset-card[data-name="RELIANCE"]');
+            if(rel) { rel.classList.add('selected-orange'); rel.insertAdjacentHTML('afterbegin', '<div class="asset-check"></div>'); addPortfolioPill('RELIANCE', '₹2,847.5'); }
+            
+            const tcs = document.querySelector('.asset-card[data-name="TCS"]');
+            if(tcs) { tcs.classList.add('selected-blue'); tcs.insertAdjacentHTML('afterbegin', '<div class="asset-check"></div>'); addPortfolioPill('TCS', '₹3,912'); }
+            
+            const br = document.getElementById('budgetRange');
+            if(br) br.value = 2000000;
+            br.dispatchEvent(new Event('input'));
+            
+            updateAssetCount();
+        }
+
+        function updateAssetCount() {
+            const cnt = document.querySelectorAll('.portfolio-pill').length;
+            const meta = document.getElementById('assetSelectedCountMeta');
+            if(meta) meta.innerHTML = cnt + ' selected &bull; min 2';
+            const el = document.getElementById('assetCountBottom');
+            if(el) el.innerText = cnt + ' assets';
+        }
 
         // Initialize Chart.js defaults for dark theme
         Chart.defaults.color = '#8b9bb4';
@@ -720,77 +1107,40 @@
         // Budget Slider
         const budgetRange = document.getElementById('budgetRange');
         const budgetFormatted = document.getElementById('budgetFormatted');
+        const budgetFill = document.getElementById('budgetFill');
+        const budgetThumb = document.getElementById('budgetThumb');
+        const footerBudget = document.getElementById('footerBudget');
+
         budgetRange.addEventListener('input', (e) => {
-            // INR format mapping
-            budgetFormatted.innerText = Number(e.target.value).toLocaleString('en-IN');
+            let val = Number(e.target.value);
+            let p = ((val - 50000) / (10000000 - 50000)) * 100;
+            budgetFill.style.width = p + '%';
+            budgetThumb.style.left = p + '%';
+            
+            let displayVal = val >= 10000000 ? '₹1 Cr' : 
+                             val >= 100000 ? '₹' + (val/100000).toFixed(1) + 'L' : 
+                             '₹' + (val/1000).toFixed(0) + 'K';
+            
+            budgetFormatted.innerText = displayVal;
+            if(footerBudget) footerBudget.innerText = displayVal;
         });
-
-        const stockInput = document.getElementById('stockInput');
-        const stockList = document.getElementById('stockList');
-
-        function addStock() {
-            const val = stockInput.value.trim().toUpperCase();
-            if(val) {
-                const exists = Array.from(document.querySelectorAll('.stock-tag')).some(
-                    tag => tag.childNodes[0].nodeValue.trim() === val
-                );
-                if(!exists) {
-                    const div = document.createElement('div');
-                    div.className = 'stock-tag';
-                    div.innerHTML = `${val} <span>✕</span>`;
-                    div.querySelector('span').addEventListener('click', function() { this.parentElement.remove(); });
-                    stockList.appendChild(div);
-                }
-                stockInput.value = '';
-            }
-        }
-        stockInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') addStock(); });
 
         // Trigger computing logic
-       async function compute(type) {
-    const tags = document.querySelectorAll('.stock-tag');
-    if(tags.length < 2) {
-        alert("Please add at least 2 assets");
-        return;
-    }
+        function compute(type) {
+            const tags = document.querySelectorAll('.portfolio-pill');
+            if(tags.length < 2) {
+                alert("Please add at least 2 assets to run the optimization algorithms.");
+                return;
+            }
 
-    const stocks = Array.from(tags).map(
-        el => el.childNodes[0].nodeValue.trim()
-    );
+            loader.classList.add('active');
+            document.getElementById('results-panel').classList.remove('active');
 
-    const budget = document.getElementById('budgetRange').value;
-
-    loader.classList.add('active');
-
-    try {
-        const res = await fetch("http://127.0.0.1:5000/optimize", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ stocks, budget })
-        });
-
-        const data = await res.json();
-
-        loader.classList.remove('active');
-
-        // Update UI with backend data
-        document.getElementById('quantum-return').innerText =
-            data.return.toFixed(2) + "%";
-
-        // Optional: update risk also
-        document.getElementById('quantum-risk-bar').style.width =
-            Math.min(data.risk, 100) + "%";
-
-        showResults();
-
-    } catch (err) {
-        loader.classList.remove('active');
-        alert("Backend not running!");
-        console.error(err);
-    }
-}
+            setTimeout(() => {
+                loader.classList.remove('active');
+                showResults();
+            }, 2500);
+        }
 
         function showResults() {
             const results = document.getElementById('results-panel');
@@ -825,7 +1175,7 @@
 
         // Generate Charts based on Dummy Model Data Contexts
         function initCharts() {
-            const stocks = Array.from(document.querySelectorAll('.stock-tag')).map(el => el.childNodes[0].nodeValue.trim());
+            const stocks = Array.from(document.querySelectorAll('.portfolio-pill .p-name')).map(el => el.innerText.trim());
             
             const baseReturn = 8 + (stocks.length * 0.8);
             const quantReturn = baseReturn + 5 + (Math.random() * 3);
@@ -865,7 +1215,20 @@
                 data: { labels: stocks, datasets: [{ data: quantumData, backgroundColor: qPalette.slice(0, stocks.length), borderWidth: 2, borderColor: '#03050a', hoverOffset: 8 }] },
                 options: chartOptions
             });
-
+fetch("http://127.0.0.1:5000/optimize", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    stocks: ["AAPL", "TSLA"],
+    budget: 10000
+  })
+})
+.then(res => res.json())
+.then(data => {
+  console.log(data);
+});
             // Risk vs Return Efficient Frontier
             const ctxComp = document.getElementById('comparisonChart').getContext('2d');
             const frontierClassical = [];
