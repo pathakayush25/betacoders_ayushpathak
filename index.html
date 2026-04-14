@@ -747,21 +747,50 @@
         stockInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') addStock(); });
 
         // Trigger computing logic
-        function compute(type) {
-            const tags = document.querySelectorAll('.stock-tag');
-            if(tags.length < 2) {
-                alert("Please add at least 2 assets to run the optimization algorithms.");
-                return;
-            }
+       async function compute(type) {
+    const tags = document.querySelectorAll('.stock-tag');
+    if(tags.length < 2) {
+        alert("Please add at least 2 assets");
+        return;
+    }
 
-            loader.classList.add('active');
-            document.getElementById('results-panel').classList.remove('active');
+    const stocks = Array.from(tags).map(
+        el => el.childNodes[0].nodeValue.trim()
+    );
 
-            setTimeout(() => {
-                loader.classList.remove('active');
-                showResults();
-            }, 2500);
-        }
+    const budget = document.getElementById('budgetRange').value;
+
+    loader.classList.add('active');
+
+    try {
+        const res = await fetch("http://127.0.0.1:5000/optimize", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ stocks, budget })
+        });
+
+        const data = await res.json();
+
+        loader.classList.remove('active');
+
+        // Update UI with backend data
+        document.getElementById('quantum-return').innerText =
+            data.return.toFixed(2) + "%";
+
+        // Optional: update risk also
+        document.getElementById('quantum-risk-bar').style.width =
+            Math.min(data.risk, 100) + "%";
+
+        showResults();
+
+    } catch (err) {
+        loader.classList.remove('active');
+        alert("Backend not running!");
+        console.error(err);
+    }
+}
 
         function showResults() {
             const results = document.getElementById('results-panel');
