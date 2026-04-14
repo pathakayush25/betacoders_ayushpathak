@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OPTIWEALTH | Quantum Portfolio Optimizer</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <!-- Charting Library -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* ========================
+           1. CSS VARIABLES & THEME
+           ======================== */
+        :root {
+            --bg-color: #03050a;
+            --primary: #00e5ff;
+            --secondary: #bd00ff;
+            --accent: #00f0ff;
+            --glass-bg: rgba(17, 25, 40, 0.6);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --text-main: #ffffff;
+            --text-muted: #8b9bb4;
+            --transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background-image: radial-gradient(circle at 15% 50%, rgba(0, 229, 255, 0.05), transparent 25%),
+                              radial-gradient(circle at 85% 30%, rgba(189, 0, 255, 0.05), transparent 25%);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Ambient Lights (Particles/Glow) */
+        .ambient-light {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.4;
+            z-index: -1;
+            animation: pulse 10s infinite alternate;
+        }
+        .light-1 {
+            background: rgba(0, 229, 255, 0.2);
+            width: 40vw; height: 40vw;
+            top: -10vw; left: -10vw;
+        }
+        .light-2 {
+            background: rgba(189, 0, 255, 0.15);
+            width: 50vw; height: 50vw;
+            bottom: -20vw; right: -10vw;
+            animation-delay: -5s;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1) translate(0, 0); }
+            100% { transform: scale(1.1) translate(3%, 3%); }
+        }
+
+        /* Typography */
+        h1, h2, h3, h4 {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(to right, var(--text-main), #b4c5e4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 800; line-height: 1.2; margin-bottom: 1rem; }
+        .tagline { font-size: 1.1rem; color: var(--text-muted); margin-bottom: 2rem; max-width: 600px; margin-left: auto; margin-right: auto; line-height: 1.6;}
+
+        /* Screen Management - Smooth Fades */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            opacity: 0; visibility: hidden;
+            transition: opacity 0.6s ease, visibility 0.6s ease;
+            z-index: 5;
+        }
+        .screen.active {
+            position: relative;
+            opacity: 1; visibility: visible;
+            z-index: 10;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Glassmorphism Cards */
+        .glass-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 2.5rem;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
+            transition: var(--transition);
+        }
+        .glass-card:hover { border-color: rgba(0, 229, 255, 0.3); box-shadow: 0 8px 40px rgba(0, 229, 255, 0.1); }
+
+        /* ========================
+           2. INPUTS & BUTTONS
+           ======================== */
+        /* Floating logic mapped ONLY to floating-input class */
+        .floating-group { position: relative; margin-bottom: 1.8rem; text-align: left; }
+        .floating-input {
+            width: 100%;
+            background: rgba(0,0,0,0.4);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 1.2rem 1.2rem 0.8rem;
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        .floating-input:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); background: rgba(0,0,0,0.6); }
+        .floating-group label {
+            position: absolute;
+            left: 1.2rem; top: 50%; transform: translateY(-50%);
+            color: var(--text-muted); font-size: 1rem; transition: var(--transition); pointer-events: none;
+        }
+        /* Float when focused or filled */
+        .floating-input:focus ~ label,
+        .floating-input:not(:placeholder-shown) ~ label,
+        .floating-input.has-val ~ label {
+            top: 0.6rem; font-size: 0.75rem; color: var(--primary); transform: translateY(0); display: block;
+        }
+        /* Date picker fix */
+        input[type="date"].floating-input { padding-top: 1.5rem; padding-bottom: 0.5rem; color: transparent; }
+        input[type="date"].floating-input:focus,
+        input[type="date"].floating-input.has-val { color: var(--text-main); }
+        input[type="date"].floating-input ~ label { top: 0.6rem; font-size: 0.75rem; color: var(--primary); transform: translateY(0); }
+        
+        .toggle-password {
+            position: absolute; right: 1.2rem; top: 50%; transform: translateY(-50%);
+            cursor: pointer; filter: grayscale(1); transition: var(--transition); font-size: 1.2rem;
+        }
+        .toggle-password:hover { filter: grayscale(0); }
+
+        /* Button Core */
+        .btn {
+            background: transparent; color: var(--text-main); border: none;
+            padding: 1rem 2rem; border-radius: 12px; font-weight: 600; font-family: 'Inter', sans-serif;
+            cursor: pointer; transition: var(--transition); display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+            font-size: 0.95rem; position: relative; overflow: hidden; text-decoration: none;
+        }
+        .btn-outline { border: 1px solid rgba(0, 229, 255, 0.5); color: #00e5ff; }
+        .btn-outline:hover { background: rgba(0, 229, 255, 0.1); box-shadow: 0 0 20px rgba(0, 229, 255, 0.2); border-color: var(--primary); }
+        .btn-glow {
+            background: linear-gradient(135deg, #00d2ff 0%, #3a7bd5 100%); border: none; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3);
+        }
+        .btn-glow:hover { box-shadow: 0 0 25px rgba(0, 229, 255, 0.6); transform: translateY(-2px); }
+        .btn-quantum {
+            background: linear-gradient(45deg, #bd00ff, #00e5ff, #bd00ff); background-size: 200% auto; animation: gradientAnim 3s ease infinite;
+            border: none; box-shadow: 0 4px 15px rgba(189, 0, 255, 0.3);
+        }
+        .btn-quantum:hover { box-shadow: 0 0 30px rgba(189, 0, 255, 0.5); transform: translateY(-2px); }
+        
+        @keyframes gradientAnim {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        /* Range Slider */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; margin: 10px 0; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 24px; width: 24px; border-radius: 50%; background: #ffffff; border: 4px solid var(--primary); cursor: pointer; margin-top: -10px; box-shadow: 0 0 15px var(--primary); transition: var(--transition); }
+        input[type=range]::-webkit-slider-thumb:hover { transform: scale(1.1); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; cursor: pointer; background: rgba(255, 255, 255, 0.1); border-radius: 3px; }
+
+        /* ========================
+           3. UI COMPONENTS
+           ======================== */
+        /* Login Screen Specifics */
+        #loginScreen { min-height: 100vh; display: flex; justify-content: center; align-items: center; padding: 2rem; position: absolute; }
+        .login-card { width: 100%; max-width: 480px; position: relative; z-index: 10; }
+
+        /* Navbar */
+        nav { display: flex; justify-content: space-between; align-items: center; padding-bottom: 4rem; }
+        .logo { font-family: 'Poppins', sans-serif; font-weight: 800; font-size: 2rem; display: flex; align-items: center; gap: 0.5rem; color: var(--text-main); letter-spacing: 2px; }
+        .logo svg { filter: drop-shadow(0 0 8px rgba(0,229,255,0.5)); }
+
+        /* Wallet Modal */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.85); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .modal-overlay.active { opacity: 1; visibility: visible; }
+        .modal-content { transform: scale(0.9); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+        .modal-overlay.active .modal-content { transform: scale(1); }
+        
+        .tabs { display: flex; gap: 1rem; border-bottom: 1px solid var(--glass-border); padding-bottom: 0.5rem; margin-bottom: 1.5rem; }
+        .tab { color: var(--text-muted); cursor: pointer; padding: 0.5rem 1rem; transition: var(--transition); border-radius: 8px; }
+        .tab:hover { color: var(--text-main); background: rgba(255,255,255,0.05); }
+        .tab.active { color: var(--primary); background: rgba(0, 229, 255, 0.1); font-weight: 600; }
+        
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.4s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        .wallet-item { background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.2rem; display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; transition: var(--transition); }
+        .wallet-item:hover { border-color: rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); }
+
+        /* Loader */
+        .loader-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 5, 10, 0.85); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; flex-direction: column; z-index: 5000; opacity: 0; visibility: hidden; transition: opacity 0.4s ease, visibility 0.4s ease;
+        }
+        .loader-overlay.active { opacity: 1; visibility: visible; }
+        .spinner-container { position: relative; width: 120px; height: 120px; margin-bottom: 2rem; }
+        
+        .spinner-ring { position: absolute; width: 100%; height: 100%; border-radius: 50%; border: 4px solid transparent; border-top-color: var(--primary); animation: spin 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite; }
+        .spinner-ring:nth-child(2) { inset: 15px; border-width: 3px; border-top-color: var(--secondary); animation: spin 2s linear infinite reverse; }
+        .spinner-ring:nth-child(3) { inset: 30px; border-width: 3px; border-top-color: var(--text-main); animation: spin 1s linear infinite; }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+
+        /* Dashboard Forms */
+        .hero { text-align: center; padding: 2rem 0 4rem; max-width: 900px; margin: 0 auto; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem; }
+        @media (max-width: 960px) { .grid-2 { grid-template-columns: 1fr; } }
+        
+        .budget-display { font-weight: 600; color: var(--primary); font-size: 1.1rem; background: rgba(0, 229, 255, 0.1); padding: 0.2rem 0.8rem; border-radius: 8px; }
+        input[type="text"].stock-in { width: 100%; background: rgba(0,0,0,0.4); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1rem 1.2rem; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 1rem; transition: var(--transition); }
+        input[type="text"].stock-in:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); background: rgba(0,0,0,0.6); }
+
+        .stock-tags { display: flex; flex-wrap: wrap; gap: 0.8rem; margin-top: 1rem; }
+        .stock-tag { background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.15); padding: 0.5rem 1.2rem; border-radius: 20px; font-size: 0.9rem; display: flex; align-items: center; gap: 0.8rem; transition: var(--transition); }
+        .stock-tag:hover { border-color: rgba(255, 255, 255, 0.3); background: rgba(255, 255, 255, 0.1); }
+        .stock-tag span { cursor: pointer; color: var(--text-muted); font-weight: 800; transition: var(--transition); }
+        .stock-tag span:hover { color: #ff4757; transform: scale(1.2); }
+
+        /* Results Panel */
+        .results-container { display: none; opacity: 0; transform: translateY(30px); transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1); margin-top: 2rem; }
+        .results-container.active { display: block; opacity: 1; transform: translateY(0); }
+        .stat-box { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1.5rem; padding-bottom: 1.5rem; border-bottom: 1px solid var(--glass-border); }
+        .stat-value { font-size: 2rem; font-weight: 700; color: var(--primary); line-height: 1; }
+        .stat-value.quantum-color { color: var(--secondary); }
+        .progress-bar-bg { background: rgba(255,255,255,0.08); height: 10px; border-radius: 5px; overflow: hidden; margin-top: 0.8rem; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+        .progress-bar-fill { height: 100%; background: var(--primary); width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); border-radius: 5px; position: relative; box-shadow: 0 0 10px var(--primary); }
+        .progress-bar-fill.quantum { background: var(--secondary); box-shadow: 0 0 10px var(--secondary); }
+        .chart-container { position: relative; height: 280px; width: 100%; margin-top: 2rem; }
+        .comparison-highlight { text-align: center; padding: 4rem 2rem; background: linear-gradient(180deg, rgba(189, 0, 255, 0.08) 0%, rgba(17, 25, 40, 0.4) 100%); border-radius: 24px; border: 1px solid rgba(189, 0, 255, 0.2); margin-top: 3rem; position: relative; overflow: hidden; box-shadow: inset 0 0 40px rgba(189, 0, 255, 0.05); }
+        .counter-wrap { display: flex; align-items: baseline; justify-content: center; gap: 0.5rem; }
+        .counter { font-size: 5rem; font-weight: 800; color: var(--secondary); margin: 1.5rem 0; text-shadow: 0 0 30px rgba(189, 0, 255, 0.4); font-family: 'Poppins', sans-serif; line-height: 1; }
+
+        /* Recommendations Section */
+        .rec-card { background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border); padding: 1.8rem; border-radius: 16px; transition: var(--transition); display: flex; flex-direction: column; }
+        .rec-card:hover { border-color: rgba(0, 229, 255, 0.4); background: rgba(0, 229, 255, 0.05); transform: translateY(-5px); box-shadow: 0 10px 40px rgba(0, 229, 255, 0.1); }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+
+        /* Fade-in Animation */
+        .fade-in { animation: fadeInScale 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeInScale { 0% { opacity: 0; transform: translateY(20px) scale(0.98); } 100% { opacity: 1; transform: translateY(0) scale(1); } }
+    </style>
+</head>
+<body>
+
+    <!-- Ambient Abstract Lights -->
+    <div class="ambient-light light-1"></div>
+    <div class="ambient-light light-2"></div>
+
+    <!-- Compute / Action Loader -->
+    <div class="loader-overlay" id="actionLoader">
+        <div class="spinner-container">
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+            <div class="spinner-ring"></div>
+        </div>
+        <h3 id="loaderTitle">Simulating Quantum States...</h3>
+        <p style="color: var(--text-muted); margin-top: 0.5rem;" id="loaderSubtitle">Running 1M+ Monte Carlo vectors</p>
+    </div>
+
+    <!-- WALLET MODAL -->
+    <div class="modal-overlay" id="walletModal">
+        <div class="glass-card modal-content" style="max-width: 500px; width: 90%;">
+            <div class="flex-between" style="margin-bottom: 2rem;">
+                <h3 style="font-size: 1.4rem;">Connect Wallet</h3>
+                <span style="cursor:pointer; font-size: 1.4rem; color: var(--text-muted); line-height: 1;" onclick="closeWalletModal()">✕</span>
+            </div>
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('bank', this)">Bank Accounts</div>
+                <div class="tab" onclick="switchTab('card', this)">Credit Cards</div>
+            </div>
+            
+            <div id="bankTab" class="tab-content active">
+                <div id="bankList">
+                    <div class="wallet-item">
+                        <div>
+                            <div style="font-weight: 600; color: #fff;">HDFC Bank</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:0.3rem;">Checking •••• 4567</div>
+                        </div>
+                        <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="removeWalletItem(this)">Remove</button>
+                    </div>
+                </div>
+                <button class="btn btn-glow" style="width: 100%; margin-top: 1rem;" onclick="addDummyBank()">+ Add Bank Account</button>
+            </div>
+
+            <div id="cardTab" class="tab-content">
+                <div id="cardList">
+                    <div class="wallet-item">
+                        <div>
+                            <div style="font-weight: 600; color: #fff;">ICICI Coral Card</div>
+                            <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:0.3rem;">Visa •••• 9876  (Exp 12/28)</div>
+                        </div>
+                        <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="removeWalletItem(this)">Remove</button>
+                    </div>
+                </div>
+                <button class="btn btn-glow" style="width: 100%; margin-top: 1rem;" onclick="addDummyCard()">+ Add Credit Card</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- SCREEN 1: LOGIN (Full Height Glassmorphism)    -->
+    <!-- ============================================== -->
+    <div id="loginScreen" class="screen active">
+        <div class="glass-card login-card fade-in" style="animation-delay: 0.2s;">
+            <h2 style="text-align: center; margin-bottom: 1.5rem; font-size: 2.2rem; letter-spacing: 2px;">OPTIWEALTH</h2>
+            <p style="text-align: center; color: var(--text-muted); margin-bottom: 2.5rem; font-size: 0.95rem;">Enter credentials to access quantum optimization interface.</p>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="floating-group">
+                    <input type="text" id="usernameInput" class="floating-input" placeholder=" " required oninput="checkInputVal(this)">
+                    <label>Username</label>
+                </div>
+                <div class="floating-group">
+                    <!-- Date picker styled via CSS -->
+                    <input type="date" id="dobInput" class="floating-input" required onchange="checkInputVal(this)">
+                    <label>Date of Birth</label>
+                </div>
+                <div class="floating-group">
+                    <input type="email" id="emailInput" class="floating-input" placeholder=" " required oninput="checkInputVal(this)">
+                    <label>Email ID</label>
+                </div>
+                <div class="floating-group">
+                    <input type="password" id="passwordInput" class="floating-input" placeholder=" " required oninput="checkInputVal(this)">
+                    <label>Password</label>
+                    <span class="toggle-password" onclick="togglePassword()">👁️</span>
+                </div>
+                <button type="submit" class="btn btn-glow" style="width: 100%; margin-top: 1rem; padding: 1.2rem; font-size: 1rem;">Authenticate Login</button>
+            </form>
+        </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- SCREEN 2: DASHBOARD (Finance App Core)         -->
+    <!-- ============================================== -->
+    <div id="dashboardScreen" class="screen">
+        <div class="container fade-in">
+            <!-- Navbar -->
+            <nav>
+                <div class="logo">
+                    <svg width="36" height="36" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    OPTIWEALTH
+                </div>
+                <button class="btn btn-outline" style="font-size: 0.9rem;" onclick="openWalletModal()">Connect Wallet</button>
+            </nav>
+
+            <div class="hero">
+                <h1>Quantum Portfolio Optimization</h1>
+                <p class="tagline">Smarter investing powered by quantum computing. Unleash next-generation algorithms for maximum returns and minimized risk tailored for the Indian Market.</p>
+                <button class="btn btn-glow" onclick="document.getElementById('input-section').scrollIntoView({behavior: 'smooth', block: 'center'})">Optimize Now</button>
+            </div>
+
+            <!-- Configuration / Input Section -->
+            <div id="input-section" class="glass-card" style="margin-bottom: 2rem; max-width: 850px; margin-left: auto; margin-right: auto;">
+                <h3 style="margin-bottom: 2.5rem; font-size: 1.5rem;">Configure Your Portfolio</h3>
+                
+                <div style="margin-bottom: 2.5rem;">
+                    <label style="display:block; margin-bottom: 1rem; color: #b4c5e4;">Investment Budget (INR)</label>
+                    <div class="flex-between" style="margin-bottom: 1rem;">
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">₹10,000</span>
+                        <span class="budget-display">₹<span id="budgetFormatted">10,00,000</span></span>
+                        <span style="color: var(--text-muted); font-size: 0.9rem;">₹1,00,00,000</span>
+                    </div>
+                    <input type="range" id="budgetRange" min="10000" max="10000000" step="10000" value="1000000">
+                </div>
+
+                <div>
+                    <label style="display:block; margin-bottom: 1rem; color: #b4c5e4;">Add Assets to Portfolio</label>
+                    <div style="display: flex; gap: 1rem;">
+                        <input type="text" id="stockInput" class="stock-in" placeholder="Enter stock ticker (e.g. RELIANCE, TCS)">
+                        <button class="btn btn-outline" onclick="addStock()" style="padding: 0 2rem;">Add</button>
+                    </div>
+                    <div class="stock-tags" id="stockList">
+                        <div class="stock-tag">RELIANCE <span>✕</span></div>
+                        <div class="stock-tag">TCS <span>✕</span></div>
+                        <div class="stock-tag">HDFCBANK <span>✕</span></div>
+                        <div class="stock-tag">INFY <span>✕</span></div>
+                        <div class="stock-tag">ITC <span>✕</span></div>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 1.5rem; margin-top: 3.5rem; flex-wrap: wrap;">
+                    <button class="btn btn-outline" style="flex: 1; min-width: 200px; padding: 1.2rem;" onclick="compute('classical')">
+                        Classical Compute
+                    </button>
+                    <button class="btn btn-quantum" style="flex: 1; min-width: 200px; padding: 1.2rem;" onclick="compute('quantum')">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:0.5rem;"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>
+                        Quantum Compute
+                    </button>
+                </div>
+            </div>
+
+            <!-- Results Output -->
+            <div id="results-panel" class="results-container">
+                <h2 style="text-align: center; margin: 5rem 0 3rem; font-size: 2.5rem;">Optimization Results</h2>
+                
+                <div class="grid-2">
+                    <!-- Classical Card -->
+                    <div class="glass-card">
+                        <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; font-size: 1.3rem;">
+                            <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--primary); box-shadow: 0 0 10px var(--primary);"></span>
+                            Classical Portfolio
+                        </h3>
+                        
+                        <div class="stat-box">
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">Expected Return</div>
+                                <div class="stat-value" id="classical-return">12.4%</div>
+                            </div>
+                             <div>
+                                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; text-align: right; text-transform: uppercase;">Risk Level</div>
+                                <div class="stat-value" style="color: #ffcf00; font-size: 1.4rem;">Medium</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 2.5rem;">
+                            <div class="flex-between" style="font-size: 0.95rem; font-weight: 500;">
+                                <span>Risk Score</span>
+                                <span style="color: #ffcf00;">65/100</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill" id="classical-risk-bar" style="width: 0%; background: #ffcf00; box-shadow: 0 0 10px #ffcf00;"></div>
+                            </div>
+                        </div>
+
+                        <h4 style="font-size: 1rem; color: var(--text-muted); text-align: center; margin-bottom: 1rem;">Asset Allocation</h4>
+                        <div class="chart-container">
+                            <canvas id="classicalChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Quantum Card -->
+                    <div class="glass-card" style="border-color: rgba(189, 0, 255, 0.4); position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(189, 0, 255, 0.1);">
+                        <div style="position: absolute; top:-100px; right:-100px; width:300px; height:300px; background: rgba(189, 0, 255, 0.15); filter: blur(50px); border-radius:50%; z-index: -1;"></div>
+                        
+                        <h3 style="margin-bottom: 2rem; display: flex; align-items: center; gap: 0.8rem; font-size: 1.3rem;">
+                            <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--secondary); box-shadow: 0 0 10px var(--secondary);"></span>
+                            Quantum Portfolio
+                        </h3>
+                        
+                        <div class="stat-box">
+                            <div>
+                                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; text-transform: uppercase;">Expected Return</div>
+                                <div class="stat-value quantum-color" id="quantum-return">18.7%</div>
+                            </div>
+                             <div>
+                                <div style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 0.5rem; text-align: right; text-transform: uppercase;">Risk Level</div>
+                                <div class="stat-value quantum-color" style="color: #00e5ff; font-size: 1.4rem;">Optimal</div>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 2.5rem;">
+                            <div class="flex-between" style="font-size: 0.95rem; font-weight: 500;">
+                                <span>Risk Score</span>
+                                <span style="color: #00e5ff;">38/100</span>
+                            </div>
+                            <div class="progress-bar-bg">
+                                <div class="progress-bar-fill quantum" id="quantum-risk-bar" style="width: 0%; background: #00e5ff; box-shadow: 0 0 10px #00e5ff;"></div>
+                            </div>
+                        </div>
+
+                        <h4 style="font-size: 1rem; color: var(--text-muted); text-align: center; margin-bottom: 1rem;">Asset Allocation</h4>
+                        <div class="chart-container">
+                            <canvas id="quantumChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card" style="margin-bottom: 2rem; padding: 3rem;">
+                    <h3 style="font-size: 1.5rem; margin-bottom: 0.5rem;">Risk vs Return Visualization</h3>
+                    <p style="color: var(--text-muted); margin-bottom: 2rem;">Comparing the efficient frontier mapped by Classical vs Quantum algorithms.</p>
+                    <div class="chart-container" style="height: 450px;">
+                        <canvas id="comparisonChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="comparison-highlight glass-card">
+                    <h3 style="color: var(--text-main); font-size: 2rem;">Quantum computing achieved superior diversification</h3>
+                    <div class="counter-wrap">
+                        <span style="font-size: 2.5rem; color: var(--primary); font-weight: bold;">+</span>
+                        <div class="counter" id="improvementCounter">0</div>
+                        <span style="font-size: 3rem; color: var(--secondary); font-weight: bold;">%</span>
+                    </div>
+                    <p style="font-size: 1.1rem; color: #b4c5e4; max-width: 600px; margin: 0 auto; line-height: 1.6;">
+                        Higher return per unit of risk compared to classical Monte Carlo methods over 10<sup>6</sup> iterations holding budget fixed in INR.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Recommended Investments -->
+            <div class="glass-card" style="margin-top: 4rem; padding-top: 3rem; padding-bottom: 3rem;">
+                <h3 style="margin-bottom: 2rem; font-size: 1.6rem; display: flex; align-items: center; gap: 0.8rem;">
+                    <span style="display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--primary); box-shadow: 0 0 10px var(--primary);"></span>
+                    Recommended Investments
+                    <span style="font-size: 0.75rem; background: rgba(189,0,255,0.15); border: 1px solid rgba(189,0,255,0.5); padding: 0.3rem 0.8rem; border-radius: 12px; color: #e0b3ff; margin-left: auto; letter-spacing: 1px; font-weight: bold;">AI RECOMMENDED</span>
+                </h3>
+                
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem;">
+                    <!-- Rec Card 1 -->
+                    <div class="rec-card">
+                        <div class="flex-between" style="margin-bottom: 1.5rem;">
+                            <h4 style="color: #fff; font-size: 1.2rem;">TATA MOTORS</h4>
+                            <span style="color: #00ffaa; font-weight: bold; background: rgba(0,255,170,0.1); padding: 0.2rem 0.6rem; border-radius: 6px;">+14.2%</span>
+                        </div>
+                        <div style="height: 50px; width: 100%; margin-bottom: 1.5rem;">
+                            <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                <polyline points="0,35 15,30 30,35 45,20 60,25 75,10 90,15 100,5" fill="none" stroke="#00ffaa" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <polygon points="0,40 0,35 15,30 30,35 45,20 60,25 75,10 90,15 100,5 100,40" fill="url(#grad1)" opacity="0.3"/>
+                                <defs><linearGradient id="grad1" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00ffaa" /><stop offset="100%" stop-color="transparent" /></linearGradient></defs>
+                            </svg>
+                        </div>
+                        <div class="flex-between" style="font-size: 0.95rem; margin-bottom: 1.5rem;">
+                            <span style="color: var(--text-muted);">Risk Profile</span>
+                            <span style="color: #00ffaa; font-weight: 500;">Low Risk</span>
+                        </div>
+                        <button class="btn btn-outline" style="width: 100%; padding: 0.8rem; margin-top: auto;" onclick="alert('Proceeding to order placement for TATA MOTORS...')">Invest Now</button>
+                    </div>
+
+                    <!-- Rec Card 2 -->
+                    <div class="rec-card">
+                        <div class="flex-between" style="margin-bottom: 1.5rem;">
+                            <h4 style="color: #fff; font-size: 1.2rem;">ZOMATO</h4>
+                            <span style="color: #00e5ff; font-weight: bold; background: rgba(0,229,255,0.1); padding: 0.2rem 0.6rem; border-radius: 6px;">+28.5%</span>
+                        </div>
+                        <div style="height: 50px; width: 100%; margin-bottom: 1.5rem;">
+                            <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                <polyline points="0,35 20,20 40,30 60,10 80,15 100,2" fill="none" stroke="#00e5ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <polygon points="0,40 0,35 20,20 40,30 60,10 80,15 100,2 100,40" fill="url(#grad2)" opacity="0.3"/>
+                                <defs><linearGradient id="grad2" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#00e5ff" /><stop offset="100%" stop-color="transparent" /></linearGradient></defs>
+                            </svg>
+                        </div>
+                        <div class="flex-between" style="font-size: 0.95rem; margin-bottom: 1.5rem;">
+                            <span style="color: var(--text-muted);">Risk Profile</span>
+                            <span style="color: #ffcf00; font-weight: 500;">Medium Risk</span>
+                        </div>
+                        <button class="btn btn-outline" style="width: 100%; padding: 0.8rem; margin-top: auto;" onclick="alert('Proceeding to order placement for ZOMATO...')">Invest Now</button>
+                    </div>
+
+                    <!-- Rec Card 3 -->
+                    <div class="rec-card" style="border-color: rgba(189,0,255,0.3); box-shadow: 0 4px 20px rgba(189,0,255,0.05);">
+                        <div class="flex-between" style="margin-bottom: 1.5rem;">
+                            <h4 style="color: #fff; font-size: 1.2rem;">NIFTY SCALER ETF</h4>
+                            <span style="color: #bd00ff; font-weight: bold; background: rgba(189,0,255,0.1); padding: 0.2rem 0.6rem; border-radius: 6px;">+18.8%</span>
+                        </div>
+                        <div style="height: 50px; width: 100%; margin-bottom: 1.5rem;">
+                            <svg width="100%" height="100%" preserveAspectRatio="none" viewBox="0 0 100 40">
+                                <polyline points="0,30 25,25 50,20 75,15 100,10" fill="none" stroke="#bd00ff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                                <polygon points="0,40 0,30 25,25 50,20 75,15 100,10 100,40" fill="url(#grad3)" opacity="0.3"/>
+                                <defs><linearGradient id="grad3" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#bd00ff" /><stop offset="100%" stop-color="transparent" /></linearGradient></defs>
+                            </svg>
+                        </div>
+                        <div class="flex-between" style="font-size: 0.95rem; margin-bottom: 1.5rem;">
+                            <span style="color: var(--text-muted);">Risk Profile</span>
+                            <span style="color: #bd00ff; font-weight: 500;">Optimized Edge</span>
+                        </div>
+                        <button class="btn btn-quantum" style="width: 100%; padding: 0.8rem; margin-top: auto; font-size: 0.9rem;" onclick="alert('Proceeding to order placement for NIFTY SCALER ETF...')">Invest Now</button>
+                    </div>
+                </div>
+            </div> <!-- End Recommendations -->
+        </div>
+    </div>
+
+
+    <!-- ============================================== -->
+    <!-- JAVASCRIPT LOGIC                               -->
+    <!-- ============================================== -->
+    <script>
+        // --- 1. Login Functionality ---
+        const loginScreen = document.getElementById('loginScreen');
+        const dashboardScreen = document.getElementById('dashboardScreen');
+        const loader = document.getElementById('actionLoader');
+
+        function togglePassword() {
+            const input = document.getElementById('passwordInput');
+            input.type = input.type === 'password' ? 'text' : 'password';
+        }
+
+        function checkInputVal(el) {
+            // Helper logic for floating label CSS class requirement if browser compatibility falters
+            if(el.value.trim() !== '') el.classList.add('has-val');
+            else el.classList.remove('has-val');
+        }
+
+        function handleLogin(e) {
+            e.preventDefault(); 
+            // Basic Frontend Validation is handled by HTML 'required' attributes.
+            const user = document.getElementById('usernameInput').value;
+            const email = document.getElementById('emailInput').value;
+            
+            if(user && email) {
+                // Show loader with Auth text
+                document.getElementById('loaderTitle').innerText = "Authenticating User...";
+                document.getElementById('loaderSubtitle').innerText = "Verifying quantum encrypted parameters";
+                loader.classList.add('active');
+
+                // Simulate processing time
+                setTimeout(() => {
+                    loader.classList.remove('active');
+                    loginScreen.classList.remove('active');
+                    
+                    setTimeout(() => {
+                        // Restore computing text for later
+                        document.getElementById('loaderTitle').innerText = "Simulating Quantum States...";
+                        document.getElementById('loaderSubtitle').innerText = "Running 1M+ Monte Carlo vectors";
+                    }, 500);
+
+                    // Show Dashboard
+                    setTimeout(() => {
+                        dashboardScreen.classList.add('active');
+                        window.scrollTo(0,0);
+                    }, 50);
+                }, 1500);
+            }
+        }
+
+        // --- 2. Wallet Modal Functionality ---
+        const walletModal = document.getElementById('walletModal');
+        
+        function openWalletModal() { walletModal.classList.add('active'); }
+        function closeWalletModal() { walletModal.classList.remove('active'); }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            if (event.target == walletModal) closeWalletModal();
+        }
+
+        function switchTab(tabId, el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            el.classList.add('active');
+            
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            document.getElementById(tabId + 'Tab').classList.add('active');
+        }
+
+        function removeWalletItem(btn) {
+            btn.parentElement.style.opacity = '0';
+            setTimeout(() => { btn.parentElement.remove(); }, 300);
+        }
+
+        let dummyBankCount = 1;
+        function addDummyBank() {
+            const list = document.getElementById('bankList');
+            const div = document.createElement('div');
+            div.className = 'wallet-item';
+            div.innerHTML = `
+                <div>
+                    <div style="font-weight: 600; color: #fff;">SBI Bank - Acc ${dummyBankCount}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:0.3rem;">Savings •••• ${Math.floor(1000 + Math.random() * 9000)}</div>
+                </div>
+                <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="removeWalletItem(this)">Remove</button>
+            `;
+            list.appendChild(div);
+            dummyBankCount++;
+        }
+
+        let dummyCardCount = 1;
+        function addDummyCard() {
+            const list = document.getElementById('cardList');
+            const div = document.createElement('div');
+            div.className = 'wallet-item';
+            div.innerHTML = `
+                <div>
+                    <div style="font-weight: 600; color: #fff;">Quantum Black Card ${dummyCardCount}</div>
+                    <div style="font-size: 0.85rem; color: var(--text-muted); margin-top:0.3rem;">Mastercard •••• ${Math.floor(1000 + Math.random() * 9000)}</div>
+                </div>
+                <button class="btn btn-outline" style="padding: 0.4rem 0.8rem; font-size: 0.8rem;" onclick="removeWalletItem(this)">Remove</button>
+            `;
+            list.appendChild(div);
+            dummyCardCount++;
+        }
+
+        // --- 3. Dashboard Functionality / Calculator Logics ---
+        document.querySelectorAll('.stock-tag span').forEach(el => {
+            el.addEventListener('click', function() { this.parentElement.remove(); });
+        });
+
+        // Initialize Chart.js defaults for dark theme
+        Chart.defaults.color = '#8b9bb4';
+        Chart.defaults.font.family = "'Inter', sans-serif";
+        Chart.defaults.scale.grid.color = 'rgba(255, 255, 255, 0.05)';
+        
+        let classicalDonut, quantumDonut, compChart;
+
+        // Budget Slider
+        const budgetRange = document.getElementById('budgetRange');
+        const budgetFormatted = document.getElementById('budgetFormatted');
+        budgetRange.addEventListener('input', (e) => {
+            // INR format mapping
+            budgetFormatted.innerText = Number(e.target.value).toLocaleString('en-IN');
+        });
+
+        const stockInput = document.getElementById('stockInput');
+        const stockList = document.getElementById('stockList');
+
+        function addStock() {
+            const val = stockInput.value.trim().toUpperCase();
+            if(val) {
+                const exists = Array.from(document.querySelectorAll('.stock-tag')).some(
+                    tag => tag.childNodes[0].nodeValue.trim() === val
+                );
+                if(!exists) {
+                    const div = document.createElement('div');
+                    div.className = 'stock-tag';
+                    div.innerHTML = `${val} <span>✕</span>`;
+                    div.querySelector('span').addEventListener('click', function() { this.parentElement.remove(); });
+                    stockList.appendChild(div);
+                }
+                stockInput.value = '';
+            }
+        }
+        stockInput.addEventListener('keypress', (e) => { if(e.key === 'Enter') addStock(); });
+
+        // Trigger computing logic
+        function compute(type) {
+            const tags = document.querySelectorAll('.stock-tag');
+            if(tags.length < 2) {
+                alert("Please add at least 2 assets to run the optimization algorithms.");
+                return;
+            }
+
+            loader.classList.add('active');
+            document.getElementById('results-panel').classList.remove('active');
+
+            setTimeout(() => {
+                loader.classList.remove('active');
+                showResults();
+            }, 2500);
+        }
+
+        function showResults() {
+            const results = document.getElementById('results-panel');
+            results.classList.add('active');
+            
+            setTimeout(() => {
+                results.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }, 100);
+
+            setTimeout(() => {
+                document.getElementById('classical-risk-bar').style.width = '65%';
+                document.getElementById('quantum-risk-bar').style.width = '38%';
+                animateCounter('improvementCounter', 0, 47, 2000);
+            }, 600);
+
+            initCharts();
+        }
+
+        function animateCounter(id, start, end, duration) {
+            let obj = document.getElementById(id);
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Ease out
+                const easeProgress = progress * (2 - progress);
+                obj.innerHTML = Math.floor(easeProgress * (end - start) + start);
+                if (progress < 1) window.requestAnimationFrame(step);
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        // Generate Charts based on Dummy Model Data Contexts
+        function initCharts() {
+            const stocks = Array.from(document.querySelectorAll('.stock-tag')).map(el => el.childNodes[0].nodeValue.trim());
+            
+            const baseReturn = 8 + (stocks.length * 0.8);
+            const quantReturn = baseReturn + 5 + (Math.random() * 3);
+            
+            document.getElementById('classical-return').innerText = baseReturn.toFixed(1) + '%';
+            document.getElementById('quantum-return').innerText = quantReturn.toFixed(1) + '%';
+
+            let classicalData = stocks.map(() => Math.floor(Math.random() * 30 + 10));
+            let quantumData = stocks.map(() => Math.floor(Math.random() * 40 + 5));
+
+            const cPalette = ['#00e5ff', '#0097ff', '#0055ff', '#5500ff', '#30475e', '#f05454'];
+            const qPalette = ['#bd00ff', '#ff0099', '#00e5ff', '#ffcc00', '#00ffaa', '#ff3366'];
+
+            if(classicalDonut) classicalDonut.destroy();
+            if(quantumDonut) quantumDonut.destroy();
+            if(compChart) compChart.destroy();
+
+            const chartOptions = {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'right', labels: { color: '#ffffff', padding: 20, font: { size: 13, family: 'Inter' } } },
+                    tooltip: { backgroundColor: 'rgba(17, 25, 40, 0.9)', titleFont: { size: 14, family: 'Inter' }, padding: 12, borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 }
+                },
+                cutout: '75%', animation: { animateScale: true, animateRotate: true, duration: 1500 }
+            };
+
+            const ctxClass = document.getElementById('classicalChart').getContext('2d');
+            classicalDonut = new Chart(ctxClass, {
+                type: 'doughnut',
+                data: { labels: stocks, datasets: [{ data: classicalData, backgroundColor: cPalette.slice(0, stocks.length), borderWidth: 2, borderColor: '#03050a', hoverOffset: 8 }] },
+                options: chartOptions
+            });
+
+            const ctxQuant = document.getElementById('quantumChart').getContext('2d');
+            quantumDonut = new Chart(ctxQuant, {
+                type: 'doughnut',
+                data: { labels: stocks, datasets: [{ data: quantumData, backgroundColor: qPalette.slice(0, stocks.length), borderWidth: 2, borderColor: '#03050a', hoverOffset: 8 }] },
+                options: chartOptions
+            });
+
+            // Risk vs Return Efficient Frontier
+            const ctxComp = document.getElementById('comparisonChart').getContext('2d');
+            const frontierClassical = [];
+            const frontierQuantum = [];
+            for(let i=8; i<=35; i+=2) {
+                frontierClassical.push({x: i, y: Math.log(i)*4 + Math.random()*1.5});
+                frontierQuantum.push({x: i, y: Math.log(i)*6 + Math.random() + 2});
+            }
+
+            compChart = new Chart(ctxComp, {
+                type: 'line',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Classical Monte Carlo', data: frontierClassical, borderColor: '#00e5ff', backgroundColor: 'rgba(0, 229, 255, 0.05)',
+                            borderWidth: 3, pointBackgroundColor: '#03050a', pointBorderColor: '#00e5ff', pointHoverBackgroundColor: '#00e5ff', pointHoverBorderColor: '#fff',
+                            pointRadius: 4, pointHoverRadius: 7, tension: 0.4, fill: true
+                        }, 
+                        {
+                            label: 'Quantum VQE Optimization', data: frontierQuantum, borderColor: '#bd00ff', backgroundColor: 'rgba(189, 0, 255, 0.1)',
+                            borderWidth: 4, pointBackgroundColor: '#03050a', pointBorderColor: '#bd00ff', pointHoverBackgroundColor: '#bd00ff', pointHoverBorderColor: '#fff',
+                            pointRadius: 4, pointHoverRadius: 7, tension: 0.4, fill: true
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true, maintainAspectRatio: false, animation: { duration: 2000, easing: 'easeOutQuart' },
+                    scales: {
+                        x: { type: 'linear', title: { display: true, text: 'Risk (Volatility %)', color: '#b4c5e4', font: { size: 14 } } },
+                        y: { title: { display: true, text: 'Expected Return (%)', color: '#b4c5e4', font: { size: 14 } } }
+                    },
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: { legend: { position: 'top', labels: { color: '#fff', font: { size: 14 } } }, tooltip: { backgroundColor: 'rgba(17, 25, 40, 0.9)' } }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
